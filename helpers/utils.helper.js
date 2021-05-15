@@ -1,4 +1,6 @@
 "use strict";
+const crypto = require("crypto");
+
 const utilsHelper = {};
 
 /**
@@ -37,6 +39,10 @@ utilsHelper.generateRandomHexString = (len) => {
     .slice(0, len)
     .toUpperCase();
 };
+
+// utilsHelper.generateRandomHexString = (len) => {
+//   return cryptoRandomString({ length: len, type: "alphanumeric" });
+// };
 
 utilsHelper.filterFields = (obj, allows) => {
   const result = {};

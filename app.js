@@ -9,6 +9,7 @@ const mongoURI = process.env.MONGODB_URI;
 const utilsHelper = require("./helpers/utils.helper");
 
 const indexRouter = require("./routes/index");
+// const { emailInternalHelper } = require("./helpers/email.helper");
 
 const app = express();
 
@@ -27,6 +28,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
+    // emailInternalHelper.createTemplatesIfNotExists();
     console.log(`Mongoose connected to ${mongoURI}`);
     // require("./testing/testSchema");
   })

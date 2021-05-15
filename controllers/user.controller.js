@@ -6,6 +6,8 @@ const {
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const Friendship = require("../models/Friendship");
+const utilsHelper = require("../helpers/utils.helper");
+const { emailHelper } = require("../helpers/email.helper");
 
 const userController = {};
 
@@ -18,13 +20,32 @@ userController.register = catchAsync(async (req, res, next) => {
 
   const salt = await bcrypt.genSalt(10);
   password = await bcrypt.hash(password, salt);
+
+  const emailVerificationCode = utilsHelper.generateRandomHexString(10);
+
   user = await User.create({
     name,
     email,
     password,
     avatarUrl,
+    emailVerified: false,
+    emailVerificationCode,
   });
   const accessToken = await user.generateToken();
+
+  // time to send email with verification
+  const verificationURL = `${process.env.FRONTEND_URL}/verify/${emailVerificationCode}`;
+  const emailData = await emailHelper.renderEmailTemplate(
+    "verify_email",
+    { name, code: verificationURL },
+    email
+  );
+
+  if (emailData.error) {
+    throw new Error(emailData.error);
+  } else {
+    emailHelper.send(emailData);
+  }
 
   return sendResponse(res, 200, true, { user }, null, "Create user successful");
 });
@@ -65,7 +86,7 @@ userController.getUsers = catchAsync(async (req, res, next) => {
     .limit(limit);
 
   const promises = users.map(async (user) => {
-    let temp = user.toJSON;
+    let temp = user.toJSON();
     temp.friendship = await Friendship.findOne(
       {
         $or: [
@@ -79,6 +100,7 @@ userController.getUsers = catchAsync(async (req, res, next) => {
   });
 
   const usersWithFriendship = await Promise.all(promises);
+  console.log("users with friendship: ", usersWithFriendship);
 
   return sendResponse(
     res,
@@ -128,7 +150,7 @@ userController.sendFriendRequest = catchAsync(async (req, res, next) => {
       res,
       200,
       true,
-      null,
+      friendship, //null,
       null,
       "Friend Request has been sent"
     );
@@ -169,7 +191,7 @@ userController.sendFriendRequest = catchAsync(async (req, res, next) => {
           res,
           200,
           true,
-          null,
+          friendship, // null,
           null,
           "Friend Request has been sent"
         );
@@ -205,7 +227,7 @@ userController.acceptFriendRequest = catchAsync(async (req, res, next) => {
     res,
     200,
     true,
-    null,
+    friendship,
     null,
     "Accept Friend Request success"
   );
@@ -416,7 +438,7 @@ userController.cancelFriendRequest = catchAsync(async (req, res, next) => {
     res,
     200,
     true,
-    null,
+    friendship, //null,
     null,
     "Friend request has been cancelled"
   );
@@ -438,7 +460,14 @@ userController.removeFriendship = catchAsync(async (req, res, next) => {
 
   friendship.status = "removed";
   await friendship.save();
-  return sendResponse(res, 200, true, null, null, "Remove friendship success");
+  return sendResponse(
+    res,
+    200,
+    true,
+    friendship,
+    null,
+    "Remove friendship success"
+  );
 });
 
 module.exports = userController;

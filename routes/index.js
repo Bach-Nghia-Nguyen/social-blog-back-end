@@ -1,5 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const email = require("../helpers/email.helper");
+
+router.get("/test-email", (req, res) => {
+  email.sendTestEmail();
+  res.send("email sent");
+});
 
 // userApi
 const userApi = require("./user.api");
@@ -23,6 +29,7 @@ router.use("/reactions", reactionApi);
 
 // friendshipApi
 const friendshipApi = require("./friendship.api");
+// const { sendTestEmail } = require("../helpers/email.helper");
 router.use("/friends", friendshipApi);
 
 module.exports = router;

@@ -5,7 +5,7 @@ const {
 } = require("../helpers/utils.helper");
 const Blog = require("../models/Blog");
 const Review = require("../models/Review");
-const User = require("../models/User");
+// const User = require("../models/User");
 
 const blogController = {};
 
@@ -66,11 +66,11 @@ blogController.createNewBlog = catchAsync(async (req, res, next) => {
 blogController.updateSingleBlog = catchAsync(async (req, res, next) => {
   const author = req.userId;
   const blogId = req.params.id;
-  const { title, content } = req.body;
+  const { title, content, images } = req.body;
 
   const blog = await Blog.findOneAndUpdate(
     { _id: blogId, author: author },
-    { title, content },
+    { title, content, images },
     { new: true }
   );
 
@@ -107,7 +107,7 @@ blogController.deleteSingleBlog = catchAsync(async (req, res, next) => {
     );
   }
 
-  return sendResponse(res, 200, true, null, null, "Delete Blog success");
+  return sendResponse(res, 200, true, blog, null, "Delete Blog success");
 });
 
 module.exports = blogController;
