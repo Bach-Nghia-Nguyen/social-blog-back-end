@@ -6,8 +6,8 @@ const {
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const Friendship = require("../models/Friendship");
-const utilsHelper = require("../helpers/utils.helper");
-const { emailHelper } = require("../helpers/email.helper");
+// const utilsHelper = require("../helpers/utils.helper");
+// const { emailHelper } = require("../helpers/email.helper");
 
 const userController = {};
 
@@ -21,31 +21,31 @@ userController.register = catchAsync(async (req, res, next) => {
   const salt = await bcrypt.genSalt(10);
   password = await bcrypt.hash(password, salt);
 
-  const emailVerificationCode = utilsHelper.generateRandomHexString(10);
+  // const emailVerificationCode = utilsHelper.generateRandomHexString(10);
 
   user = await User.create({
     name,
     email,
     password,
     avatarUrl,
-    emailVerified: false,
-    emailVerificationCode,
+    //emailVerified: false,
+    //emailVerificationCode,
   });
-  const accessToken = await user.generateToken();
+  // const accessToken = await user.generateToken();
 
   // time to send email with verification
-  const verificationURL = `${process.env.FRONTEND_URL}/verify/${emailVerificationCode}`;
-  const emailData = await emailHelper.renderEmailTemplate(
-    "verify_email",
-    { name, code: verificationURL },
-    email
-  );
+  // const verificationURL = `${process.env.FRONTEND_URL}/verify/${emailVerificationCode}`;
+  // const emailData = await emailHelper.renderEmailTemplate(
+  //   "verify_email",
+  //   { name, code: verificationURL },
+  //   email
+  // );
 
-  if (emailData.error) {
-    throw new Error(emailData.error);
-  } else {
-    emailHelper.send(emailData);
-  }
+  // if (emailData.error) {
+  //   throw new Error(emailData.error);
+  // } else {
+  //   emailHelper.send(emailData);
+  // }
 
   return sendResponse(res, 200, true, { user }, null, "Create user successful");
 });
